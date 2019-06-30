@@ -1,6 +1,7 @@
 <launch>
 	<include file="$(find pimouse_ros)/launch/pimouse.launch" />
-	
+	<param name="lightsensors_enable" value="False" />
+
 	<node pkg="cv_camera" name="cv_camera" type="cv_camera_node">
 		<param name="image_width" value="320" />
 		<param name="image_height" value="180" />
@@ -10,6 +11,6 @@
 		<param name="port" value="10000" />
 	</node>
 
-	<node pkg="pimouse_vision_control" name="face_to_face" type="face_to_face.py" output="screen" />	
+	<node pkg="pimouse_vision_control" name="face_to_face" type="face_to_face.py" output="screen" />
 	<rosparam command="load" file="$(find pimouse_vision_control)/vision_control.yaml" />
 </launch>

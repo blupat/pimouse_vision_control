@@ -61,10 +61,9 @@ class FaceToFace():
             return 0.0
         
         wid = image.shape[1] / 2
-        wid = self.image_org.shape[1] / 2
         pos_x_rate = (r[0] + r[2] / 2 - wid) * 1.0 / wid
         rot = -self.angular_gain * pos_x_rate * math.pi
-        rospy.loginfo("detected %.6f", rot)
+        rospy.loginfo("detected %f", rot)
         return rot
     
     def control(self):
