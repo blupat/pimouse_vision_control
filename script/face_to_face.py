@@ -17,6 +17,13 @@ class FaceToFace():
         rospy.wait_for_service('/motor_off')
         rospy.on_shutdown(rospy.ServiceProxy('motor_off', Trigger).call)
         rospy.ServiceProxy('motor_on', Trigger).call()
+        
+        self.angular_gain = rospy.get_param("/vision_control/angular_gain")
+        self.scale_factor = rospy.get_param("/vision_control/scale_factor")
+        self.min_neighbors = rospy.get_param("/vision_control/min_neighbors")
+        
+        classifier = "/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml"
+        self.cascade = cv2.CascadeClassifier(classifier)
     
     def get_image(self, img):
         try:
@@ -37,9 +44,7 @@ class FaceToFace():
         org = self.image_org
         
         gimg = cv2.cvtColor(org, cv2.COLOR_BGR2GRAY)
-        classifier = "/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml"
-        cascade = cv2.CascadeClassifier(classifier)
-        face = cascade.detectMultiScale(gimg, 1.1, 1, cv2.CASCADE_FIND_BIGGEST_OBJECT)
+        face = self.cascade.detectMultiScale(gimg, self.scale_factor, self.min_neighbors, cv2.CASCADE_FIND_BIGGEST_OBJECT)
         
         if len(face) == 0:
             self.monitor(None, org)
@@ -56,9 +61,10 @@ class FaceToFace():
             return 0.0
         
         wid = image.shape[1] / 2
+        wid = self.image_org.shape[1] / 2
         pos_x_rate = (r[0] + r[2] / 2 - wid) * 1.0 / wid
-        rot = -0.25 * pos_x_rate * math.pi
-        rospy.loginfo("detected %f", rot)
+        rot = -self.angular_gain * pos_x_rate * math.pi
+        rospy.loginfo("detected %.6f", rot)
         return rot
     
     def control(self):
@@ -71,7 +77,8 @@ if __name__ == "__main__":
     rospy.init_node("face_to_face")
     fd = FaceToFace()
     
-    rate = rospy.Rate(10)
+    control_rate = rospy.get_param("/vision_control/control_rate")
+    rate = rospy.Rate(control_rate)
     while not rospy.is_shutdown():
         fd.control()
         rate.sleep()
