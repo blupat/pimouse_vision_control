@@ -18,7 +18,7 @@ class FaceToFace():
         self.__angular_gain = rospy.get_param("/vision_control/angular_gain")
     
     def rot_vel(self, pos_x_rate):
-        rot = -self.__angular_gain * pos_x_rate * math.pi
+        rot = -self.__angular_gain * pos_x_rate.data * math.pi
         
         m = Twist()
         m.linear.x = 0.0
@@ -28,4 +28,4 @@ class FaceToFace():
 if __name__ == "__main__":
     rospy.init_node("face_to_face")
     fd = FaceToFace()
-    rospy.spin():
+    rospy.spin()
